@@ -44,26 +44,28 @@ OpenClaude requires the [Claude Code CLI](https://docs.anthropic.com/en/docs/cla
 
 ## Keybindings
 
+`Ctrl+X` is the **leader key** — press it, then a second key within 2 seconds.
+
 | Key | Action |
 |-----|--------|
 | Enter | Send message |
 | Esc | Cancel generation / close dialog |
-| Ctrl+C | Quit |
+| Ctrl+C ×2 | Quit (double-press) |
 | Ctrl+K | Command palette |
-| Ctrl+S | Session switcher |
-| Ctrl+T | Theme picker |
-| Ctrl+F | File picker |
-| Ctrl+? | Help |
-| Ctrl+N | New session |
+| Ctrl+X s | Session switcher |
+| Ctrl+X t | Theme picker |
+| Ctrl+X f | File picker |
+| Ctrl+X ? | Help |
+| Ctrl+X n | New session |
 | PgUp / PgDn | Scroll messages |
 
 ## Themes
 
-- **Claude Dark** (default)
+- **Nord** (default)
 - **Catppuccin Mocha**
 - **Dracula**
 
-Cycle through themes with `Ctrl+T`.
+Cycle through themes with `Ctrl+X t`.
 
 ## Configuration
 

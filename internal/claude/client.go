@@ -46,7 +46,7 @@ func (c *Client) Run(ctx context.Context, opts RunOptions) (<-chan Event, error)
 		args = append(args, "--model", opts.Model)
 	}
 
-	args = append(args, "--prompt", opts.Prompt)
+	args = append(args, opts.Prompt)
 
 	cmd := exec.CommandContext(ctx, c.claudePath, args...)
 

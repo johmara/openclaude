@@ -4,20 +4,16 @@ import "github.com/charmbracelet/bubbles/key"
 
 // KeyMap defines the global keybindings.
 type KeyMap struct {
-	Send          key.Binding
-	Cancel        key.Binding
-	Quit          key.Binding
+	Send           key.Binding
+	Cancel         key.Binding
+	Quit           key.Binding
 	CommandPalette key.Binding
-	SessionSwitch key.Binding
-	ThemePicker   key.Binding
-	FilePicker    key.Binding
-	Help          key.Binding
-	NewSession    key.Binding
-	ScrollUp      key.Binding
-	ScrollDown    key.Binding
-	PageUp        key.Binding
-	PageDown      key.Binding
-	Escape        key.Binding
+	Leader         key.Binding
+	ScrollUp       key.Binding
+	ScrollDown     key.Binding
+	PageUp         key.Binding
+	PageDown       key.Binding
+	Escape         key.Binding
 }
 
 // DefaultKeyMap returns the default keybindings.
@@ -33,31 +29,15 @@ func DefaultKeyMap() KeyMap {
 		),
 		Quit: key.NewBinding(
 			key.WithKeys("ctrl+c"),
-			key.WithHelp("ctrl+c", "quit"),
+			key.WithHelp("ctrl+c ctrl+c", "quit"),
 		),
 		CommandPalette: key.NewBinding(
 			key.WithKeys("ctrl+k"),
 			key.WithHelp("ctrl+k", "command palette"),
 		),
-		SessionSwitch: key.NewBinding(
-			key.WithKeys("ctrl+s"),
-			key.WithHelp("ctrl+s", "sessions"),
-		),
-		ThemePicker: key.NewBinding(
-			key.WithKeys("ctrl+t"),
-			key.WithHelp("ctrl+t", "themes"),
-		),
-		FilePicker: key.NewBinding(
-			key.WithKeys("ctrl+f"),
-			key.WithHelp("ctrl+f", "file picker"),
-		),
-		Help: key.NewBinding(
-			key.WithKeys("ctrl+/"),
-			key.WithHelp("ctrl+?", "help"),
-		),
-		NewSession: key.NewBinding(
-			key.WithKeys("ctrl+n"),
-			key.WithHelp("ctrl+n", "new session"),
+		Leader: key.NewBinding(
+			key.WithKeys("ctrl+x"),
+			key.WithHelp("ctrl+x", "leader key"),
 		),
 		ScrollUp: key.NewBinding(
 			key.WithKeys("up"),

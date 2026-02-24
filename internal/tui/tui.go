@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"time"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -34,7 +36,6 @@ const (
 	DialogTheme
 	DialogFilePicker
 	DialogHelp
-	DialogQuit
 )
 
 // ClaudeEventMsg wraps a claude event for the Bubble Tea message loop.
@@ -46,6 +47,12 @@ type ClaudeEventMsg struct {
 type sendDoneMsg struct {
 	err error
 }
+
+// leaderTimeoutMsg fires when the leader key window expires.
+type leaderTimeoutMsg struct{}
+
+// ctrlCTimeoutMsg fires when the Ctrl+C double-press window expires.
+type ctrlCTimeoutMsg struct{}
 
 // Model is the root Bubble Tea model.
 type Model struct {
@@ -62,7 +69,12 @@ type Model struct {
 	themeDialog   dialog.ThemePicker
 	fileDialog    dialog.FilePicker
 	helpDialog    dialog.Help
-	quitDialog    dialog.Quit
+
+	// Leader key state
+	leaderActive bool
+
+	// Double Ctrl+C state
+	ctrlCPressed bool
 
 	// State
 	width       int
@@ -177,8 +189,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.SetMessage("Selected: " + msg.Path)
 		return m, nil
 
-	case dialog.QuitConfirmedMsg:
-		return m, tea.Quit
+	case leaderTimeoutMsg:
+		m.leaderActive = false
+		m.statusBar.SetLeader(false)
+		return m, nil
+
+	case ctrlCTimeoutMsg:
+		m.ctrlCPressed = false
+		m.statusBar.SetMessage("")
+		return m, nil
 
 	case tea.KeyMsg:
 		// Handle dialog-level keys first
@@ -186,14 +205,35 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateDialog(msg)
 		}
 
+		// Leader key second-press dispatch
+		if m.leaderActive {
+			m.leaderActive = false
+			m.statusBar.SetLeader(false)
+			return m.handleLeaderAction(msg)
+		}
+
 		// Global keybindings
 		switch {
 		case key.Matches(msg, m.keys.Quit):
-			m.activeDialog = DialogQuit
-			m.quitDialog = dialog.NewQuit()
-			m.quitDialog.SetSize(m.width, m.height)
-			m.chatPage.BlurEditor()
-			return m, nil
+			if m.ctrlCPressed {
+				// Second Ctrl+C → quit
+				return m, tea.Quit
+			}
+			// First Ctrl+C → start window
+			m.ctrlCPressed = true
+			m.statusBar.SetMessage("Press Ctrl+C again to quit")
+			cmds = append(cmds, tea.Tick(2*time.Second, func(time.Time) tea.Msg {
+				return ctrlCTimeoutMsg{}
+			}))
+			return m, tea.Batch(cmds...)
+
+		case key.Matches(msg, m.keys.Leader):
+			m.leaderActive = true
+			m.statusBar.SetLeader(true)
+			cmds = append(cmds, tea.Tick(2*time.Second, func(time.Time) tea.Msg {
+				return leaderTimeoutMsg{}
+			}))
+			return m, tea.Batch(cmds...)
 
 		case key.Matches(msg, m.keys.CommandPalette):
 			m.activeDialog = DialogCommands
@@ -201,35 +241,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.commandDialog.SetSize(m.width, m.height)
 			m.chatPage.BlurEditor()
 			return m, m.commandDialog.Init()
-
-		case key.Matches(msg, m.keys.ThemePicker):
-			m.activeDialog = DialogTheme
-			m.themeDialog = dialog.NewThemePicker()
-			m.themeDialog.SetSize(m.width, m.height)
-			m.chatPage.BlurEditor()
-			return m, m.themeDialog.Init()
-
-		case key.Matches(msg, m.keys.FilePicker):
-			m.activeDialog = DialogFilePicker
-			m.fileDialog = dialog.NewFilePicker()
-			m.fileDialog.SetSize(m.width, m.height)
-			m.chatPage.BlurEditor()
-			return m, m.fileDialog.Init()
-
-		case key.Matches(msg, m.keys.Help):
-			m.activeDialog = DialogHelp
-			m.helpDialog = dialog.NewHelp()
-			m.helpDialog.SetSize(m.width, m.height)
-			m.chatPage.BlurEditor()
-			return m, nil
-
-		case key.Matches(msg, m.keys.NewSession):
-			m.app.CreateSession("New Session")
-			m.chatPage.Clear()
-			sess := m.app.ActiveSessionName()
-			m.statusBar.SetSession(sess)
-			m.statusBar.SetMessage("New session created")
-			return m, nil
 
 		case key.Matches(msg, m.keys.Cancel):
 			if m.chatPage.IsStreaming() {
@@ -249,6 +260,51 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, tea.Batch(cmds...)
+}
+
+// handleLeaderAction processes the second key after the leader key.
+func (m Model) handleLeaderAction(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "s":
+		// Session switcher — currently maps to command palette
+		m.activeDialog = DialogCommands
+		m.commandDialog = dialog.NewCommands()
+		m.commandDialog.SetSize(m.width, m.height)
+		m.chatPage.BlurEditor()
+		return m, m.commandDialog.Init()
+
+	case "t":
+		m.activeDialog = DialogTheme
+		m.themeDialog = dialog.NewThemePicker()
+		m.themeDialog.SetSize(m.width, m.height)
+		m.chatPage.BlurEditor()
+		return m, m.themeDialog.Init()
+
+	case "f":
+		m.activeDialog = DialogFilePicker
+		m.fileDialog = dialog.NewFilePicker()
+		m.fileDialog.SetSize(m.width, m.height)
+		m.chatPage.BlurEditor()
+		return m, m.fileDialog.Init()
+
+	case "?":
+		m.activeDialog = DialogHelp
+		m.helpDialog = dialog.NewHelp()
+		m.helpDialog.SetSize(m.width, m.height)
+		m.chatPage.BlurEditor()
+		return m, nil
+
+	case "n":
+		m.app.CreateSession("New Session")
+		m.chatPage.Clear()
+		sess := m.app.ActiveSessionName()
+		m.statusBar.SetSession(sess)
+		m.statusBar.SetMessage("New session created")
+		return m, nil
+	}
+
+	// Unknown leader sequence — ignore
+	return m, nil
 }
 
 // handleSend sends a message and starts streaming.
@@ -302,10 +358,7 @@ func (m Model) handleCommand(cmd string) (tea.Model, tea.Cmd) {
 		m.helpDialog.SetSize(m.width, m.height)
 		m.chatPage.BlurEditor()
 	case "quit":
-		m.activeDialog = DialogQuit
-		m.quitDialog = dialog.NewQuit()
-		m.quitDialog.SetSize(m.width, m.height)
-		m.chatPage.BlurEditor()
+		return m, tea.Quit
 	}
 
 	return m, nil
@@ -324,8 +377,6 @@ func (m Model) updateDialog(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fileDialog, cmd = m.fileDialog.Update(msg)
 	case DialogHelp:
 		m.helpDialog, cmd = m.helpDialog.Update(msg)
-	case DialogQuit:
-		m.quitDialog, cmd = m.quitDialog.Update(msg)
 	}
 
 	return m, cmd
@@ -355,8 +406,6 @@ func (m Model) View() string {
 			dialogView = m.fileDialog.View()
 		case DialogHelp:
 			dialogView = m.helpDialog.View()
-		case DialogQuit:
-			dialogView = m.quitDialog.View()
 		}
 
 		if dialogView != "" {

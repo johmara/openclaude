@@ -17,6 +17,7 @@ type Bar struct {
 	streaming bool
 	message   string
 	session   string
+	leader    bool
 }
 
 // New creates a new status bar.
@@ -59,6 +60,11 @@ func (b *Bar) SetSession(name string) {
 	b.session = name
 }
 
+// SetLeader sets the leader key active indicator.
+func (b *Bar) SetLeader(active bool) {
+	b.leader = active
+}
+
 // View renders the status bar.
 func (b Bar) View() string {
 	t := theme.Current()
@@ -75,6 +81,13 @@ func (b Bar) View() string {
 			Bold(true).
 			Background(t.StatusBarBg()).
 			Render(" "+b.session))
+	}
+	if b.leader {
+		left = append(left, lipgloss.NewStyle().
+			Foreground(t.Warning()).
+			Bold(true).
+			Background(t.StatusBarBg()).
+			Render("[Ctrl+X ...]"))
 	}
 	if b.streaming {
 		left = append(left, lipgloss.NewStyle().

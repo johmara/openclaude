@@ -39,13 +39,13 @@ type helpBinding struct {
 var bindings = []helpBinding{
 	{"Enter", "Send message"},
 	{"Esc", "Cancel generation / close dialog"},
-	{"Ctrl+C", "Quit"},
+	{"Ctrl+C ×2", "Quit"},
 	{"Ctrl+K", "Command palette"},
-	{"Ctrl+S", "Session switcher"},
-	{"Ctrl+T", "Theme picker"},
-	{"Ctrl+F", "File picker"},
-	{"Ctrl+?", "This help dialog"},
-	{"Ctrl+N", "New session"},
+	{"Ctrl+X s", "Session switcher"},
+	{"Ctrl+X t", "Theme picker"},
+	{"Ctrl+X f", "File picker"},
+	{"Ctrl+X ?", "This help dialog"},
+	{"Ctrl+X n", "New session"},
 	{"PgUp/PgDn", "Scroll messages"},
 }
 
