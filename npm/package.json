@@ -1,5 +1,5 @@
 {
-  "name": "openclaude",
+  "name": "@johmara/openclaude",
   "version": "0.0.0",
   "description": "A full-featured TUI for Claude Code",
   "bin": {
@@ -20,5 +20,8 @@
   ],
   "author": "johmara",
   "license": "MIT",
-  "homepage": "https://github.com/johmara/openclaude"
+  "homepage": "https://github.com/johmara/openclaude",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }
