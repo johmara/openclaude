@@ -20,8 +20,5 @@
   ],
   "author": "johmara",
   "license": "MIT",
-  "homepage": "https://github.com/johmara/openclaude",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  }
+  "homepage": "https://github.com/johmara/openclaude"
 }
