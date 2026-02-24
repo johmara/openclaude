@@ -35,7 +35,6 @@ func (c *Client) Run(ctx context.Context, opts RunOptions) (<-chan Event, error)
 	args := []string{
 		"--print", "--output-format", "stream-json",
 		"--verbose",
-		"--no-input",
 		"--allowedTools", "Bash", "Read", "Write", "Edit", "Glob", "Grep", "WebSearch", "WebFetch",
 	}
 
