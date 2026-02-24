@@ -8,9 +8,9 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/johanmontorfano/openclaude/internal/claude"
-	"github.com/johanmontorfano/openclaude/internal/tui/styles"
-	"github.com/johanmontorfano/openclaude/internal/tui/theme"
+	"github.com/johmara/openclaude/internal/claude"
+	"github.com/johmara/openclaude/internal/tui/styles"
+	"github.com/johmara/openclaude/internal/tui/theme"
 )
 
 // ToolCall tracks a tool call's state.

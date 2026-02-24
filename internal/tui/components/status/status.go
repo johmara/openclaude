@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/johanmontorfano/openclaude/internal/tui/theme"
+	"github.com/johmara/openclaude/internal/tui/theme"
 )
 
 // Bar is the bottom status bar.

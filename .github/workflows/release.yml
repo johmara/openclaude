@@ -1,0 +1,190 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  MODULE: github.com/johmara/openclaude
+  BINARY: openclaude
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+          - goos: windows
+            goarch: arm64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          EXT=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
+          OUTNAME="${BINARY}-${{ matrix.goos }}-${{ matrix.goarch }}${EXT}"
+          go build -ldflags "-s -w -X ${MODULE}/cmd.version=${VERSION}" -o "${OUTNAME}" .
+          # Create tarball (or zip for windows)
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            zip "${OUTNAME%.exe}.zip" "${OUTNAME}"
+          else
+            tar czf "${OUTNAME}.tar.gz" "${OUTNAME}"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BINARY }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            ${{ env.BINARY }}-${{ matrix.goos }}-${{ matrix.goarch }}*
+          retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: artifacts/*
+
+  homebrew:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Homebrew formula
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          TAG="${GITHUB_REF_NAME}"
+          REPO="johmara/openclaude"
+          TAP_REPO="johmara/homebrew-tap"
+
+          # Download darwin tarballs and compute SHA256
+          curl -sL "https://github.com/${REPO}/releases/download/${TAG}/openclaude-darwin-amd64.tar.gz" -o darwin-amd64.tar.gz
+          curl -sL "https://github.com/${REPO}/releases/download/${TAG}/openclaude-darwin-arm64.tar.gz" -o darwin-arm64.tar.gz
+          curl -sL "https://github.com/${REPO}/releases/download/${TAG}/openclaude-linux-amd64.tar.gz" -o linux-amd64.tar.gz
+          curl -sL "https://github.com/${REPO}/releases/download/${TAG}/openclaude-linux-arm64.tar.gz" -o linux-arm64.tar.gz
+
+          SHA_DARWIN_AMD64=$(sha256sum darwin-amd64.tar.gz | awk '{print $1}')
+          SHA_DARWIN_ARM64=$(sha256sum darwin-arm64.tar.gz | awk '{print $1}')
+          SHA_LINUX_AMD64=$(sha256sum linux-amd64.tar.gz | awk '{print $1}')
+          SHA_LINUX_ARM64=$(sha256sum linux-arm64.tar.gz | awk '{print $1}')
+
+          # Generate formula
+          FORMULA=$(cat <<RUBY
+          class Openclaude < Formula
+            desc "A full-featured TUI for Claude Code"
+            homepage "https://github.com/${REPO}"
+            version "${VERSION}"
+            license "MIT"
+
+            on_macos do
+              on_arm do
+                url "https://github.com/${REPO}/releases/download/${TAG}/openclaude-darwin-arm64.tar.gz"
+                sha256 "${SHA_DARWIN_ARM64}"
+              end
+              on_intel do
+                url "https://github.com/${REPO}/releases/download/${TAG}/openclaude-darwin-amd64.tar.gz"
+                sha256 "${SHA_DARWIN_AMD64}"
+              end
+            end
+
+            on_linux do
+              on_arm do
+                url "https://github.com/${REPO}/releases/download/${TAG}/openclaude-linux-arm64.tar.gz"
+                sha256 "${SHA_LINUX_ARM64}"
+              end
+              on_intel do
+                url "https://github.com/${REPO}/releases/download/${TAG}/openclaude-linux-amd64.tar.gz"
+                sha256 "${SHA_LINUX_AMD64}"
+              end
+            end
+
+            def install
+              bin.install "openclaude"
+            end
+
+            test do
+              assert_match "openclaude", shell_output("#{bin}/openclaude version")
+            end
+          end
+          RUBY
+          )
+
+          # Push formula to tap repo via GitHub API
+          CONTENT=$(echo "${FORMULA}" | base64 -w 0)
+
+          # Check if file exists (to get SHA for update)
+          EXISTING=$(curl -s -H "Authorization: token ${GH_TOKEN}" \
+            "https://api.github.com/repos/${TAP_REPO}/contents/Formula/openclaude.rb" || true)
+          FILE_SHA=$(echo "${EXISTING}" | grep '"sha"' | head -1 | cut -d'"' -f4)
+
+          PAYLOAD="{\"message\":\"Update openclaude to ${VERSION}\",\"content\":\"${CONTENT}\""
+          if [ -n "${FILE_SHA}" ]; then
+            PAYLOAD="${PAYLOAD},\"sha\":\"${FILE_SHA}\""
+          fi
+          PAYLOAD="${PAYLOAD}}"
+
+          curl -s -X PUT \
+            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}" \
+            "https://api.github.com/repos/${TAP_REPO}/contents/Formula/openclaude.rb"
+
+  publish-npm:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Publish to npm
+        working-directory: npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          # Set version from git tag
+          node -e "
+            const pkg = require('./package.json');
+            pkg.version = '${VERSION}';
+            require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          npm publish --access public

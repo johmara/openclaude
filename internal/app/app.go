@@ -7,10 +7,10 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/johanmontorfano/openclaude/internal/claude"
-	"github.com/johanmontorfano/openclaude/internal/pubsub"
-	"github.com/johanmontorfano/openclaude/internal/session"
-	"github.com/johanmontorfano/openclaude/internal/tui"
+	"github.com/johmara/openclaude/internal/claude"
+	"github.com/johmara/openclaude/internal/pubsub"
+	"github.com/johmara/openclaude/internal/session"
+	"github.com/johmara/openclaude/internal/tui"
 )
 
 // App wires together the Claude client, pub/sub broker, session manager, and TUI.

@@ -1,4 +1,4 @@
-module github.com/johanmontorfano/openclaude
+module github.com/johmara/openclaude
 
 go 1.23.0
 

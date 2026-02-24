@@ -8,8 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/johanmontorfano/openclaude/internal/tui/styles"
-	"github.com/johanmontorfano/openclaude/internal/tui/theme"
+	"github.com/johmara/openclaude/internal/tui/styles"
+	"github.com/johmara/openclaude/internal/tui/theme"
 	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 

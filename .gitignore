@@ -1,6 +1,6 @@
 # Binary
-openclaude
-openclaude.exe
+/openclaude
+/openclaude.exe
 
 # IDE
 .idea/
@@ -15,6 +15,13 @@ Thumbs.db
 
 # Go
 vendor/
+
+# Build output
+dist/
+
+# npm
+npm/node_modules/
+npm/bin/openclaude-*
 
 # Claude
 .claude/

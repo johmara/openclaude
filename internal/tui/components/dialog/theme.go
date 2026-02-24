@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/johanmontorfano/openclaude/internal/tui/theme"
+	"github.com/johmara/openclaude/internal/tui/theme"
 )
 
 // ThemeChangedMsg is emitted when a theme is selected.

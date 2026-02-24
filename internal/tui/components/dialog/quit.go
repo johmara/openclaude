@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/johanmontorfano/openclaude/internal/tui/theme"
+	"github.com/johmara/openclaude/internal/tui/theme"
 )
 
 // QuitConfirmedMsg is emitted when quit is confirmed.

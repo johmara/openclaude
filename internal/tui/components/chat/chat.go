@@ -3,7 +3,7 @@ package chat
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/johanmontorfano/openclaude/internal/claude"
+	"github.com/johmara/openclaude/internal/claude"
 )
 
 // Page assembles the full chat layout with messages, editor, and sidebar.

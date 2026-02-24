@@ -2,7 +2,7 @@ package dialog
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/johanmontorfano/openclaude/internal/session"
+	"github.com/johmara/openclaude/internal/session"
 )
 
 // SessionSelectedMsg is emitted when a session is selected.

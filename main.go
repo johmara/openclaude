@@ -1,6 +1,6 @@
 package main
 
-import "github.com/johanmontorfano/openclaude/cmd"
+import "github.com/johmara/openclaude/cmd"
 
 func main() {
 	cmd.Execute()

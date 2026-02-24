@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/johanmontorfano/openclaude/internal/app"
+	"github.com/johmara/openclaude/internal/app"
 	"github.com/spf13/cobra"
 )
 

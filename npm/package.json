@@ -1,0 +1,24 @@
+{
+  "name": "openclaude",
+  "version": "0.0.0",
+  "description": "A full-featured TUI for Claude Code",
+  "bin": {
+    "openclaude": "bin/openclaude"
+  },
+  "scripts": {
+    "postinstall": "node scripts/install.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johmara/openclaude.git"
+  },
+  "keywords": [
+    "claude",
+    "tui",
+    "cli",
+    "ai"
+  ],
+  "author": "johmara",
+  "license": "MIT",
+  "homepage": "https://github.com/johmara/openclaude"
+}

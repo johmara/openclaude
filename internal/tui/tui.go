@@ -4,12 +4,12 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/johanmontorfano/openclaude/internal/claude"
-	"github.com/johanmontorfano/openclaude/internal/tui/components/chat"
-	"github.com/johanmontorfano/openclaude/internal/tui/components/dialog"
-	"github.com/johanmontorfano/openclaude/internal/tui/components/status"
-	"github.com/johanmontorfano/openclaude/internal/tui/layout"
-	"github.com/johanmontorfano/openclaude/internal/tui/theme"
+	"github.com/johmara/openclaude/internal/claude"
+	"github.com/johmara/openclaude/internal/tui/components/chat"
+	"github.com/johmara/openclaude/internal/tui/components/dialog"
+	"github.com/johmara/openclaude/internal/tui/components/status"
+	"github.com/johmara/openclaude/internal/tui/layout"
+	"github.com/johmara/openclaude/internal/tui/theme"
 )
 
 // App is the interface that the application layer must satisfy.

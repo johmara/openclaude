@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+const { spawnSync } = require("child_process");
+const path = require("path");
+const fs = require("fs");
+const os = require("os");
+
+function getPlatformBinary() {
+  const platform = os.platform();
+  const arch = os.arch();
+
+  const platformMap = { linux: "linux", darwin: "darwin", win32: "windows" };
+  const archMap = { x64: "amd64", arm64: "arm64" };
+
+  const goos = platformMap[platform];
+  const goarch = archMap[arch];
+
+  if (!goos || !goarch) {
+    console.error(`Unsupported platform: ${platform}/${arch}`);
+    process.exit(1);
+  }
+
+  const ext = platform === "win32" ? ".exe" : "";
+  return `openclaude-${goos}-${goarch}${ext}`;
+}
+
+const binDir = __dirname;
+const binaryName = getPlatformBinary();
+const binaryPath = path.join(binDir, binaryName);
+
+if (!fs.existsSync(binaryPath)) {
+  // Binary not found — postinstall may have been skipped (common with npx).
+  // Run install.js synchronously to fetch it.
+  const installScript = path.join(__dirname, "..", "scripts", "install.js");
+  const result = spawnSync(process.execPath, [installScript], {
+    stdio: "inherit",
+    env: process.env,
+  });
+  if (result.status !== 0) {
+    console.error("Failed to download openclaude binary.");
+    process.exit(1);
+  }
+}
+
+const result = spawnSync(binaryPath, process.argv.slice(2), {
+  stdio: "inherit",
+  env: process.env,
+});
+
+process.exit(result.status ?? 1);

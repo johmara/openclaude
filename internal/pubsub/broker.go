@@ -3,7 +3,7 @@ package pubsub
 import (
 	"sync"
 
-	"github.com/johanmontorfano/openclaude/internal/claude"
+	"github.com/johmara/openclaude/internal/claude"
 )
 
 // Broker is a generic pub/sub broker for claude events.
