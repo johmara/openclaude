@@ -1,0 +1,31 @@
+package styles
+
+// Unicode symbols used throughout the UI.
+const (
+	IconSuccess    = "✓"
+	IconError      = "✗"
+	IconWarning    = "⚠"
+	IconInfo       = "ℹ"
+	IconArrowRight = "→"
+	IconArrowLeft  = "←"
+	IconArrowUp    = "↑"
+	IconArrowDown  = "↓"
+	IconBullet     = "•"
+	IconDot        = "·"
+	IconPipe       = "│"
+	IconCorner     = "└"
+	IconTee        = "├"
+	IconDash       = "─"
+	IconEllipsis   = "…"
+	IconUser       = "▶"
+	IconAssistant  = "◆"
+	IconTool       = "⚙"
+	IconCost       = "$"
+	IconTokens     = "⊞"
+	IconClock       = "⏱"
+	IconSession    = "◉"
+	IconFile       = "📄"
+	IconFolder     = "📁"
+	IconSearch     = "🔍"
+	IconCommand    = "⌘"
+)
