@@ -180,6 +180,8 @@ jobs:
 
       - name: Publish to npm
         working-directory: npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           # Set version from git tag
